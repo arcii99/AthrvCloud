@@ -1,0 +1,90 @@
+//FormAI DATASET v1.0 Category: Client Server Application ; Style: innovative
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <string.h>
+#include <unistd.h>
+
+#define PORT 8080
+
+int main(int argc, char const *argv[]) 
+{
+    int server_fd, new_socket, valread;
+    struct sockaddr_in address;
+    int opt = 1;
+    int addrlen = sizeof(address);
+    char buffer[1024] = {0};
+    char *hello = "Hello from server";
+
+    // Creating socket file descriptor
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) 
+    {
+        perror("socket failed");
+        exit(EXIT_FAILURE);
+    }
+    
+    // Attached socket to port 8080; Allows multiple connections
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) 
+    {
+        perror("setsockopt");
+        exit(EXIT_FAILURE);
+    }
+
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons( PORT );
+
+    // Forcefully attaching socket to the desired port
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0) 
+    {
+        perror("bind failed");
+        exit(EXIT_FAILURE);
+    }
+
+    // Listening on port 8080 for connections
+    if (listen(server_fd, 3) < 0) 
+    {
+        perror("listen");
+        exit(EXIT_FAILURE);
+    }
+
+    while(1)
+    {
+        // Accepting a new connection
+        if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) 
+        {
+            perror("accept");
+            exit(EXIT_FAILURE);
+        }
+
+        // Displaying client address
+        printf("Connection established with Client: %s:%d\n", inet_ntoa(address.sin_addr), ntohs(address.sin_port));
+
+        // Forking a new process to handle client request
+        int process_id = fork();
+        if(process_id == 0)
+        {
+            close(server_fd);
+
+            while(1)
+            {
+                // Reading from client
+                valread = read( new_socket , buffer, 1024);
+                if(valread == 0)
+                    break;
+
+                printf("Received Message: %s",buffer );
+
+                // Sending response to client
+                send(new_socket , hello , strlen(hello) , 0 );
+                printf("Hello message sent to client\n");
+            }
+            printf("Connection closed with Client: %s:%d\n", inet_ntoa(address.sin_addr), ntohs(address.sin_port));
+            close(new_socket);
+            exit(0);
+        }
+        close(new_socket);
+    }
+    return 0;
+}

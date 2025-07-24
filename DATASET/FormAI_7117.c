@@ -1,0 +1,37 @@
+//FormAI DATASET v1.0 Category: Image compression ; Style: funny
+#include <stdio.h>
+
+// Function to compress an image by randomly swapping pixels
+void compress_image(char* image_data, int size) {
+    int i, j;
+    char temp;
+
+    // Randomly swap pixels
+    for (i = 0; i < size; i++) {
+        j = rand() % size;
+        temp = image_data[i];
+        image_data[i] = image_data[j];
+        image_data[j] = temp;
+    }
+
+    // Print a funny message
+    printf("HAHAHA! Your image has been compressed.\n");
+}
+
+int main() {
+    char image_data[] = {
+        0x42, 0x4D, 0x36, 0x00, 0x0C, 0x00, 0x00, 0x00, 
+        0x00, 0x00, 0x36, 0x00, 0x00, 0x00, 0x28, 0x00,
+        0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x04, 0x00,
+        0x00, 0x00, 0x01, 0x00, 0x18, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x13, 0x0B,
+        0x00, 0x00, 0x13, 0x0B, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    };
+    int image_size = 54;
+
+    // Compress the image
+    compress_image(image_data, image_size);
+
+    return 0;
+}
